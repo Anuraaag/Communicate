@@ -10,9 +10,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import java.io.IOException;
 import java.net.URLEncoder;
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -20,7 +20,6 @@ public class MainActivity extends AppCompatActivity {
     EditText message;
     EditText phone;
     String sms, contact;
-    int a = 9;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,20 +31,34 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                message = findViewById(R.id.message);
-                phone = findViewById(R.id.phone);
-
-
                 try {
-                    if (isConnected() == true)
-                    {
 
+                    if (isConnected() == false) {
+                        Toast.makeText(MainActivity.this, "No internet connection!", Toast.LENGTH_SHORT).show();
+                    } else {
+                        message = findViewById(R.id.message);
+                        phone = findViewById(R.id.phone);
+
+                        //String.valueOf(phone.getText().toString().length()) //print count
+                        if (null != phone.getText().toString() && phone.getText().toString().length() == 10) {
+
+                            contact = phone.getText().toString();
+                            if (null != message.getText().toString()) {
+                                sms = message.getText().toString();
+                                sendToWhatsapp(contact, sms);
+                            } else {
+                                Toast.makeText(MainActivity.this, "Can not send a blank message", Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            Toast.makeText(MainActivity.this, "Enter a valid number", Toast.LENGTH_SHORT).show();
+                        }
                     }
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
+                }
+                catch (Exception e){
                     e.printStackTrace();
                 }
+
+
 
 
             }
@@ -58,6 +71,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (isPackageInstalled("com.whatsapp", getApplicationContext().getPackageManager()) == true) {
             Intent i = new Intent(Intent.ACTION_VIEW);
+            i.setFlags(FLAG_ACTIVITY_NEW_TASK);
             contact = "+91" + contact;
             try {
                 String url = "https://api.whatsapp.com/send?phone="+ contact +"&text=" + URLEncoder.encode(sms, "UTF-8");
